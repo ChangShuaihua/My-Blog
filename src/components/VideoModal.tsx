@@ -108,6 +108,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
         >
           {!isFullscreen && (
             <button
+            title=" 关闭"
               onClick={onClose}
               className="cursor-pointer absolute top-4 right-4 z-9999"
             >

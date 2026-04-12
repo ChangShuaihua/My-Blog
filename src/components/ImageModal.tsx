@@ -80,7 +80,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-            <button onClick={onClose} className="cursor-pointer">
+            <button onClick={onClose} className="cursor-pointer" title='关闭'>
               <SvgIcon name="close" width={30} height={30} color="#333" />
             </button>
           </div>
@@ -101,18 +101,21 @@ const ImageModal: React.FC<ImageModalProps> = ({
                 <button
                   onClick={prevImage}
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-[rgba(0,0,0,0.5)] opacity-[50%] text-white p-2 rounded-full hover:opacity-[100%] transition-all duration-200 cursor-pointer"
+                title="上一张"
                 >
                   <SvgIcon name="left" width={20} height={20} color="#fff" />
                 </button>
                 <button
                   onClick={nextImage}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[rgba(0,0,0,0.5)] opacity-[50%] text-white p-2 rounded-full hover:opacity-[100%] transition-all duration-200 cursor-pointer"
-                >
+               
+                title="下一张">
                   <SvgIcon name="right" width={20} height={20} color="#fff" />
                 </button>
                 <div className="flex justify-center mt-4 space-x-2">
                   {images.map((_, index) => (
                     <button
+                      title=" 切换图片"
                       key={index}
                       onClick={() => setCurrentIndex(index)}
                       className={`w-3 h-1 rounded-[10px] transition-all duration-200 ${

@@ -538,6 +538,7 @@ export default function CommentModal({ isOpen, onClose }: CommentModalProps) {
             欢迎留言
           </h2>
           <button
+          title="bu"
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >

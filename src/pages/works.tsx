@@ -161,6 +161,7 @@ export default function Works() {
                 {selectedWork?.title}
               </h2>
               <button
+              title="关闭"
                 onClick={closeDrawer}
                 className="bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] rounded-full p-2 transition-all duration-200 cursor-pointer"
               >
@@ -596,8 +597,9 @@ export default function Works() {
 
               <div className="flex justify-center gap-4 md:gap-6">
                 <button
+                title="Github"
                   onClick={() =>
-                    window.open("https://github.com/996wuxian", "_blank")
+                    window.open("https://github.com/changshuaihua", "_blank")
                   }
                   className="bg-[rgba(0,0,0,.5)] hover:bg-[rgba(0,0,0,.7)] rounded-xl p-2 md:p-3 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-[rgba(255,255,255,0.2)] group"
                 >
@@ -610,6 +612,7 @@ export default function Works() {
                   />
                 </button>
                 <button
+                title="QQ"
                   onClick={handleQQClick}
                   className="bg-[rgba(0,0,0,.5)] hover:bg-[rgba(0,0,0,.7)] rounded-xl p-2 md:p-3 cursor-pointer transition-all duration-300 backdrop-blur-sm border border-[rgba(255,255,255,0.2)] group"
                 >

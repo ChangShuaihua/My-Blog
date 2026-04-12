@@ -676,6 +676,7 @@ export default function ChatPage() {
             />
             {/* 移动端关闭按钮 */}
             <button
+            title=" 关闭 "
               onClick={() => setIsMobileSidebarOpen(false)}
               className={`md:hidden p-1 ${themeClasses.hoverBg} rounded`}
             >
@@ -849,6 +850,7 @@ export default function ChatPage() {
                   <div className="flex items-center space-x-3 relative w-full pt-safe-top">
                     {/* 移动端菜单按钮 */}
                     <button
+                    title="菜单"
                       onClick={() => setIsMobileSidebarOpen(true)}
                       className={`md:hidden p-2 ${themeClasses.hoverBg} rounded`}
                     >

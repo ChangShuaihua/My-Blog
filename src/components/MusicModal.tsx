@@ -232,6 +232,7 @@ const MusicModal: React.FC<MusicModalProps> = ({
           }}
         >
           <button
+          title=" 关闭"
             onClick={onClose}
             className="cursor-pointer absolute top-4 right-4"
           >

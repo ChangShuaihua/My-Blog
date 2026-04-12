@@ -7,6 +7,7 @@ export default function ThemeToggle() {
     <div className="fixed top-4 right-4 z-10">
       <label className="switch">
         <input
+        title=" Toggle theme"
           type="checkbox"
           checked={theme === "dark"}
           onChange={toggleTheme}

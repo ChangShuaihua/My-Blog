@@ -13,19 +13,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm' # 你的项目用的是 pnpm
+          cache: 'pnpm' # 保留缓存配置
+
+      # 👇 新增：手动安装 pnpm（核心修复步骤）
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
       - name: Install dependencies
         run: pnpm install
+
       - name: Build Next.js project
         run: pnpm run build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out # Next.js 静态导出的默认产物目录
+          path: ./out
+
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        

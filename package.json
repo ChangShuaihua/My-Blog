@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "author": {
-    "name": "wuxian",
+    "name": "shuaihua",
     "url": "https://github.com/changshuaihua"
   },
   "license": "MIT",
@@ -12,13 +12,13 @@
     "react",
     "typescript"
   ],
-  "homepage": "https://github.com/changshuaihua/template-web",
+  "homepage": "https://ChangShuaihua.github.io/2026-blog-public/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/changshuaihua/template-web.git"
+    "url": "https://github.com/ChangShuaihua/template-web.git"
   },
   "bugs": {
-    "url": "https://github.com/changshuaihua/template-web/issues"
+    "url": "https://github.com/ChangShuaihua/template-web/issues"
   },
   "scripts": {
     "count": "node scripts/generate-count.js",
@@ -29,7 +29,9 @@
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages-d build"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",
@@ -49,6 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/next": "^9.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

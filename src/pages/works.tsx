@@ -117,8 +117,8 @@ export default function Works() {
   return (
     <>
       <Head>
-        <title>作品集 - wuxian&apos;s web</title>
-        <meta name="description" content="wuxian的作品集展示页面" />
+        <title>作品集 - shuaihua&apos;s web</title>
+        <meta name="description" content="shuaihua的作品集展示页面" />
       </Head>
 
       {/* 图片弹窗 */}
@@ -136,7 +136,7 @@ export default function Works() {
         isOpen={isQQModalOpen}
         onClose={closeQQModal}
         title="QQ联系方式"
-        images={["/images/qq.jpg"]}
+        images={["/images/qq.png"]}
         enableDanmaku={false}
         imageWidth={300}
         imageHeight={300}
@@ -489,7 +489,7 @@ export default function Works() {
                     </div>
                   </div>
 
-                  {!work.title.includes("wuxian") ? (
+                  {!work.title.includes("shuaihua") ? (
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
                       {/* 查看详情按钮 */}
                       <button
@@ -507,7 +507,7 @@ export default function Works() {
                       </button>
 
                       {/* 原有的项目链接按钮 */}
-                      {!work.title.includes("wuxian") && work.link !== "#" && (
+                      {!work.title.includes("shuaihua") && work.link !== "#" && (
                         <>
                           <button
                             onClick={() => window.open(work.link, "_blank")}
@@ -525,7 +525,7 @@ export default function Works() {
                         </>
                       )}
 
-                      {!work.title.includes("wuxian") && work.download_url && (
+                      {!work.title.includes("shuaihua") && work.download_url && (
                         <>
                           <button
                             onClick={() =>

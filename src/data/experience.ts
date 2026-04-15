@@ -8,14 +8,14 @@ export interface ExperienceItem {
 export const experienceData: ExperienceItem[] = [
   {
     name: "经历1",
-    date: "2021-2023",
-  },
-  {
-    name: "经历2",
     date: "2023-2024",
   },
   {
+    name: "经历2",
+    date: "2024-2025",
+  },
+  {
     name: "经历3",
-    date: "2024-至今",
+    date: "2025-至今",
   },
 ];

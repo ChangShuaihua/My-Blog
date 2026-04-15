@@ -59,13 +59,13 @@ export default function Home() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const fullText = "Hello, I'm 常帅华";
+  const fullText = "Hello, I'm Shuaihua";
 
   // 打字机动画效果
   useEffect(() => {
     const typeSpeed = 150; // 打字速度
     const deleteSpeed = 100; // 删除速度
-    const pauseTime = 5000; // 完整显示后的暂停时间
+    const pauseTime = 3000; // 完整显示后的暂停时间
     const restartPause = 1000; // 删除完后重新开始的暂停时间
 
     const timer = setTimeout(
@@ -296,19 +296,19 @@ export default function Home() {
                     <span className="animate-pulse text-[#3d85a9]">|</span>
                   </span>
                 </div>
-                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[16px]">
-                  <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[18px]">
+                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[25px]">
+                  <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[20px]">
                     Front-end
                   </span>{" "}
                   development (前端开发工程师)
                 </div>
-                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[16px]">
+                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[25px]">
                   <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[18px]">
                     22
                   </span>{" "}
                   years old (22岁)
                 </div>
-                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[16px]">
+                <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[20px]">
                   <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[18px]">
                     1
                   </span>{" "}
@@ -321,7 +321,7 @@ export default function Home() {
                   >
                     <SvgIcon
                       name="github"
-                      width={20}
+                      width={40}
                       height={20}
                       color="#fff"
                     />
@@ -330,13 +330,13 @@ export default function Home() {
                     className="bg-[rgba(0,0,0,.5)] rounded-[5px] p-[8px] cursor-pointer"
                     onClick={handleQQClick}
                   >
-                    <SvgIcon name="qq" width={20} height={20} color="#fff" />
+                    <SvgIcon name="qq" width={40} height={20} color="#fff" />
                   </div>
                   <div
                     className="bg-[rgba(0,0,0,.5)] rounded-[5px] p-[8px] cursor-pointer"
                     onClick={handleWechatClick}
                   >
-                    <SvgIcon name="wechat" width={20} height={20} color="#fff" />
+                    <SvgIcon name="wechat" width={40} height={20} color="#fff" />
                   </div>
                 </div>
               </div>
@@ -389,10 +389,10 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] gap-[10px] flex flex-wrap text-[12px]">
+                  <div className="bg-[rgba(0,0,0,.3)] rounded-10px] p-[10px] text-[#fff] gap-[10px] flex flex-wrap text-[13px]">
                     {tags.map((tag) => (
                       <div
-                        className="bg-[rgba(255,255,255,.1)] rounded-[5px] p-[5px] w-fit cursor-pointer hover:bg-[rgba(255,255,255,.2)] transition-all duration-200 transform hover:scale-105"
+                        className="bg-[rgba(255,255,255,.1)] rounded-[5px] p-[12px] w-fit cursor-pointer hover:bg-[rgba(255,255,255,.2)] transition-all duration-200 transform hover:scale-105"
                         key={tag.name}
                         onClick={() => handleTagClick(tag.name)}
                       >
@@ -439,11 +439,11 @@ export default function Home() {
               {/* 右侧/底部区域 */}
               <div className="flex flex-col gap-[10px] order-1 md:order-2 w-full md:w-auto">
                 {/* GitHub贡献热力图 */}
-                {/* <div className="w-full overflow-x-auto">
-                  <GitHubHeatmap username="changshuaihua" year={2026} />
-                </div> */}
+                <div className="w-full overflow-x-auto">
+                  <GitHubHeatmap username="ChangShuaihua" year={2026} />
+                </div>
 
-                <div className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[50px] text-[#fff] text-[14px] gap-[10px] flex flex-col">
+                <div className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[40px] text-[#fff] text-[14px] gap-[10px] flex flex-col">
                   <div className="font-bold text-[16px] flex items-center gap-[5px]">
                     <SvgIcon name="site" width={30} height={20} color="#fff" />
                     <div className="flex flex-col">
@@ -454,7 +454,7 @@ export default function Home() {
                   <div className="flex gap-[10px] flex-col sm:flex-row">
                     <Link
                       href="/works"
-                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[14px] gap-[10px] flex flex-col cursor-pointer flex-1"
+                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[20px] gap-[10px] flex flex-col cursor-pointer flex-1"
                     >
                       <div className="flex justify-between items-center">
                         作品集
@@ -465,11 +465,11 @@ export default function Home() {
                           color="#fff"
                         />
                       </div>
-                      <span className="text-[12px]">记录前端作品</span>
+                      <span className="text-[18px]">记录前端作品</span>
                     </Link>
                     <Link
                       href="/blog"
-                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[14px] gap-[10px] flex flex-col cursor-pointer flex-1"
+                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[20px] gap-[10px] flex flex-col cursor-pointer flex-1"
                     >
                       <div className="flex justify-between items-center">
                         文章
@@ -480,11 +480,11 @@ export default function Home() {
                           color="#fff"
                         />
                       </div>
-                      <span className="text-[12px]">记录前端知识</span>
+                      <span className="text-[18px]">记录前端知识</span>
                     </Link>
                     <Link
                       href="/chat"
-                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[14px] gap-[10px] flex flex-col cursor-pointer flex-1"
+                      className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[20px] gap-[10px] flex flex-col cursor-pointer flex-1"
                     >
                       <div className="flex justify-between items-center">
                         聊天室
@@ -495,10 +495,10 @@ export default function Home() {
                           color="#fff"
                         />
                       </div>
-                      <span className="text-[12px]">实时聊天交流</span>
+                      <span className="text-[18px]">实时聊天交流</span>
                     </Link>
                   </div>
-                  <div className="text-[12px] md:text-[14px]">
+                  <div className="text-[20px] md:text-[18px]">
                     2026年开始持续更新中...
                   </div>
                 </div>

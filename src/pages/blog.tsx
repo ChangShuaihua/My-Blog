@@ -666,7 +666,7 @@ export default function Blog() {
   return (
     <>
       <Head>
-        <title>docs - wuxian&apos;s web</title>
+        <title>docs - shuaihua&apos;s web</title>
         <meta name="description" content="分享前端开发经验和技术文章" />
         <meta
           name="viewport"

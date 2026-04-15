@@ -225,15 +225,15 @@ const GitHubHeatmap: React.FC<GitHubHeatmapProps> = ({ username, year }) => {
   return (
     <div className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] overflow-x-auto custom-scrollbar">
       <div className="mb-[12px]">
-        <h3 className="text-[16px] font-semibold mb-[1px] flex items-center gap-2">
+        <h3 className="text-[20px] font-semibold mb-[1px] flex items-center gap-2">
           <SvgIcon name="github" width={20} height={20} color="#fff" />
           {year}年GitHub提交
         </h3>
-        <p className="text-[12px] text-[rgba(255,255,255,0.7)]">
+        <p className="text-[16px] text-[rgba(255,255,255,0.7)]">
           {totalContributions} contributions in {year}
         </p>
-        <p className="text-[12px] text-[rgba(255,255,255,0.7)]">
-          {totalContributions} 次提交在 2025年
+        <p className="text-[14px] text-[rgba(255,255,255,0.7)]">
+          {totalContributions} 次提交在 2026年
         </p>
       </div>
 

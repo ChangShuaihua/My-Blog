@@ -247,7 +247,7 @@ export default function Home() {
         <div
           className={`${geistSans.className} ${geistMono.className} items-center justify-items-center min-h-screen gap-16 font-[family-name:var(--font-geist-sans)] flex justify-center px-4 md:px-0 `}
         >
-          <div className="flex flex-col w-full max-w-3xl h-[100vh] md:h-auto overflow-y-auto md:overflow-y-visible custom-scrollbar pb-20 md:pb-0 hide-scrollbar">
+          <div className="flex flex-col w-full max-w-4xl h-[100vh] md:h-auto overflow-y-auto md:overflow-y-visible custom-scrollbar pb-20 md:pb-0 hide-scrollbar">
             {/* 头部区域 - 头像和基本信息 */}
             <div className="flex gap-[10px] flex-col md:flex-row pt-[100px] md:pt-0">
               <div className="relative w-full md:w-[250px] flex justify-center items-center mx-auto md:mx-0">
@@ -437,7 +437,7 @@ export default function Home() {
                 </div>
               </div>
               {/* 右侧/底部区域 */}
-              <div className="flex flex-col gap-[10px] order-1 md:order-2 w-full md:w-auto">
+              <div className="flex flex-col gap-[10px] order-1 md:order-2 w-full md:w-160">
                 {/* GitHub贡献热力图 */}
                 <div className="w-full overflow-x-auto">
                   <GitHubHeatmap username="ChangShuaihua" year={2026} />

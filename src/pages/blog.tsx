@@ -198,7 +198,6 @@ export default function Blog() {
     loadArticles();
     loadBlogStats();
   }, []);
-
   useEffect(() => {
     if (!selectedArticle) return;
 

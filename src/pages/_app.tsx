@@ -3,16 +3,13 @@ import type { AppProps } from "next/app";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import ThemeToggle from "@/components/ThemeToggle";
-import CommentModal from "@/components/CommentModal";
 import { useState, useEffect } from "react";
 // import SvgIcon from "@/components/SvgIcon";
 import {
-  commentAPI,
-  reactionAPI,
   ReactionType,
   ReactionCounts,
 } from "../../service/api/comment";
-import { useRouter } from "next/router";
+
 
 // 布局组件，包含公共的主题切换和背景
 function Layout({ children }: { children: React.ReactNode }) {
@@ -46,32 +43,32 @@ function Layout({ children }: { children: React.ReactNode }) {
   // });
 
   // 加载评论数量和点赞数量
-  useEffect(() => {
-    const loadCounts = async () => {
-      try {
-        const [commentsData, reactionsData] = await Promise.all([
-          commentAPI.getComments(),
-          reactionAPI.getReactions(),
-        ]);
-        setCommentCount(commentsData.length);
-        setReactionCounts(reactionsData);
+  // useEffect(() => {
+  //   const loadCounts = async () => {
+  //     try {
+  //       const [commentsData, reactionsData] = await Promise.all([
+  //         commentAPI.getComments(),
+  //         reactionAPI.getReactions(),
+  //       ]);
+  //       setCommentCount(commentsData.length);
+  //       setReactionCounts(reactionsData);
 
-        // 检查本地存储是否已点赞
-        const reacted: Record<ReactionType, boolean> = {
-          like: localStorage.getItem("hasReacted_like") === "true",
-          cheer: localStorage.getItem("hasReacted_cheer") === "true",
-          celebrate: localStorage.getItem("hasReacted_celebrate") === "true",
-          appreciate: localStorage.getItem("hasReacted_appreciate") === "true",
-          smile: localStorage.getItem("hasReacted_smile") === "true",
-        };
-        setHasReacted(reacted);
-      } catch (error) {
-        console.error("加载数据失败:", error);
-      }
-    };
+  //       // 检查本地存储是否已点赞
+  //       const reacted: Record<ReactionType, boolean> = {
+  //         like: localStorage.getItem("hasReacted_like") === "true",
+  //         cheer: localStorage.getItem("hasReacted_cheer") === "true",
+  //         celebrate: localStorage.getItem("hasReacted_celebrate") === "true",
+  //         appreciate: localStorage.getItem("hasReacted_appreciate") === "true",
+  //         smile: localStorage.getItem("hasReacted_smile") === "true",
+  //       };
+  //       setHasReacted(reacted);
+  //     } catch (error) {
+  //       console.error("加载数据失败:", error);
+  //     }
+  //   };
 
-    loadCounts();
-  }, []);
+  //   loadCounts();
+  // }, []);
 
   // 处理点赞
   // const handleReaction = async (type: ReactionType) => {
@@ -146,11 +143,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* 评论按钮 */}
 
       {/* 评论弹窗 */}
-      <CommentModal
-        isOpen={isCommentOpen}
-        onClose={() => setIsCommentOpen(false)}
-      />
-
+   
       {/* 页面内容 */}
       {children}
     </div>
@@ -164,7 +157,7 @@ export default function App({ Component, pageProps }: AppProps) {
     // 模拟加载时间，3秒后隐藏加载动画
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);

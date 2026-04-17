@@ -40,7 +40,7 @@ export const tagConfigs: Record<string, TagConfig> = {
     config: {
       isOpen: true,
       title: "做饭",
-      images: [],
+      images: ['/images/img3.jpg','/images/img222.jpg'],
       danmakuText: "好吃",
       enableDanmaku: true,
       imageWidth: 500,
@@ -52,7 +52,7 @@ export const tagConfigs: Record<string, TagConfig> = {
     config: {
       isOpen: true,
       title: "摄影作品",
-      images: [],
+      images: ['/images/img3.jpg','/images/img222.jpg'],
       danmakuText: "好看",
       enableDanmaku: true,
       imageWidth: 800,

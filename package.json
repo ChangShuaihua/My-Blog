@@ -39,7 +39,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "chokidar": "^4.0.3",
     "gray-matter": "^4.0.3",
-    "next": "15.3.5",
+    "next": "16.2.4",
     "pg": "^8.16.3",
     "prisma": "^6.13.0",
     "pusher": "^5.2.0",

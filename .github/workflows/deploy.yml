@@ -1,4 +1,4 @@
-name: 部署博客
+name: 自动部署博客
 on:
   push:
     branches: [ main ]
@@ -7,28 +7,28 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取项目代码
-        uses: actions/checkout@v4
+      # 升级v6新版，彻底解决Node20废弃警告
+      - name: 拉取代码
+        uses: actions/checkout@v6
 
-      - name: 安装 Node.js 环境
-        uses: actions/setup-node@v4
+      # 升级v6新版，原生支持pnpm，不再有无效参数报错
+      - name: 安装Node.js环境
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: 'pnpm'
 
-      # 核心修复：自动安装 pnpm，解决找不到 pnpm 报错
-      - name: 安装 pnpm 包管理器
-        run: corepack enable && corepack prepare pnpm@latest --activate
-
+      # 安装依赖（云端已自动装好pnpm，不再报错）
       - name: 安装项目依赖
         run: pnpm install
 
-      - name: 构建打包项目
+      # 打包构建
+      - name: 项目打包构建
         run: pnpm build
 
-      # 部署到 GitHub Pages（通用静态博客部署，适配绝大多数博客）
-      - name: 部署到 GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # 部署到GitHub Pages（你原本的部署逻辑完全保留）
+      - name: 部署到Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist

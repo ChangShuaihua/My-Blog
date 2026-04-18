@@ -1,4 +1,5 @@
-name: 自动部署博客
+name: Deploy Next.js Blog to GitHub Pages
+
 on:
   push:
     branches: [ main ]
@@ -7,28 +8,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 官方稳定v4版本，可正常解析，无版本不存在错误
-      - name: 拉取项目代码
+      # 1. 拉取代码
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 官方稳定v4 Node环境，无任何无效参数
-      - name: 安装Node.js环境
+      # 2. 【核心修复】安装pnpm，识别你的pnpm-lock.yaml锁文件，解决最开始的Dependencies lock file报错
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: true
+
+      # 3. 安装Node.js环境
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-          cache: 'npm'
+          node-version: 20
+          cache: 'pnpm'
 
-      # 重点：全部改用npm！云端原生自带，再也不会报找不到pnpm错误
-      - name: 安装项目依赖
-        run: npm install
+      # 4. Next.js打包构建
+      - name: Build project
+        run: |
+          pnpm install
+          pnpm build
 
-      # npm打包构建（和你本地pnpm build效果完全一致）
-      - name: 项目打包构建
-        run: npm run build
-
-      # 你原本的GitHub Pages部署逻辑完全不动保留
-      - name: 部署到Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # 5. 【真实可用部署Action】部署到GitHub Pages（替换掉错误的xxx占位符）
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./out

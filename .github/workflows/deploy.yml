@@ -2,7 +2,7 @@ name: Deploy Next.js Blog to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
@@ -11,24 +11,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. 拉取代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 安装Node.js环境
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      # 3. 安装pnpm（不在这里自动安装依赖，避免重复执行）
+      # setup-node 的 cache: pnpm 必须先有 pnpm，否则会失败
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
-      # 4. Next.js打包构建（静态导出到 out/，并适配 GitHub Pages 子路径）
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
       - name: Build project
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
@@ -36,7 +33,6 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
-      # 5. 【真实可用部署Action】部署到GitHub Pages（替换掉错误的xxx占位符）
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

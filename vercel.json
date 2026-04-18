@@ -1,10 +1,7 @@
 {
-  "functions": {
-    "src/pages/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
-  "env": {
-    "PRISMA_GENERATE_DATAPROXY": "true"
-  }
+  "framework": "nextjs",
+  "rootDirectory": ".",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": ".next"
 }

@@ -94,7 +94,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  --color: hsl(0, 0%, 87%);
+  --color: hsl(0, 0%, 96%);
   --animation: 2s ease-in-out infinite;
 }
 

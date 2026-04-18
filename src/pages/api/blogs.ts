@@ -24,22 +24,20 @@ interface BlogResponse {
 function readBlogsRecursively(dir: string, baseDir: string): BlogArticle[] {
   const articles: BlogArticle[] = [];
   const items = fs.readdirSync(dir);
-
   items.forEach((item) => {
     const fullPath = path.join(dir, item);
     const stat = fs.statSync(fullPath);
-
     if (stat.isDirectory()) {
       // 递归读取子文件夹
+
       articles.push(...readBlogsRecursively(fullPath, baseDir));
     } else if (item.endsWith(".md") && item !== "count.md") {
       // 计算相对于blogs目录的分类路径
+
       const relativePath = path.relative(baseDir, dir);
       const category = relativePath || "root";
-
       const fileContents = fs.readFileSync(fullPath, "utf8");
       const { data, content } = matter(fileContents);
-
       articles.push({
         id: `${category}-${item}`,
         title: data.title || item.replace(".md", ""),
@@ -53,7 +51,6 @@ function readBlogsRecursively(dir: string, baseDir: string): BlogArticle[] {
       });
     }
   });
-
   return articles;
 }
 

@@ -487,7 +487,7 @@ export default function Home() {
                       className="bg-[rgba(0,0,0,.3)] rounded-[5px] p-[10px] text-[#fff] text-[20px] gap-[10px] flex flex-col cursor-pointer flex-1"
                     >
                       <div className="flex justify-between items-center">
-                        聊天室
+                        留言室
                         <SvgIcon
                           name="comment"
                           width={100}

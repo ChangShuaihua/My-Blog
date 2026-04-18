@@ -5,33 +5,13 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 // import SvgIcon from "@/components/SvgIcon";
-import {
-  ReactionType,
-  ReactionCounts,
-} from "../../service/api/comment";
+ 
 
 
 // 布局组件，包含公共的主题切换和背景
 function Layout({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   // const router = useRouter();
-  const [isCommentOpen, setIsCommentOpen] = useState(false);
-
-  const [commentCount, setCommentCount] = useState(0);
-  const [reactionCounts, setReactionCounts] = useState<ReactionCounts>({
-    like: 0,
-    cheer: 0,
-    celebrate: 0,
-    appreciate: 0,
-    smile: 0,
-  });
-  const [hasReacted, setHasReacted] = useState<Record<ReactionType, boolean>>({
-    like: false,
-    cheer: false,
-    celebrate: false,
-    appreciate: false,
-    smile: false,
-  });
 
   // 添加谢谢你动画状态
   // const [showThanks, setShowThanks] = useState<Record<ReactionType, boolean>>({

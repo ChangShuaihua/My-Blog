@@ -3,8 +3,6 @@ import Head from "next/head";
 import SvgIcon from "@/components/SvgIcon";
 import { Geist, Geist_Mono } from "next/font/google";
 import React from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Link from "next/link";
 
 const geistSans = Geist({
@@ -317,8 +315,9 @@ export default function Blog() {
     };
 
     // 延迟设置监听器，确保DOM完全渲染
+    let scrollContainer: HTMLDivElement | null = null;
     const timer = setTimeout(() => {
-      const scrollContainer = blogContentRef.current;
+      scrollContainer = blogContentRef.current;
       if (scrollContainer) {
         scrollContainer.addEventListener("scroll", handleScroll);
         console.log("回到顶部监听器已添加");
@@ -332,7 +331,6 @@ export default function Blog() {
 
     return () => {
       clearTimeout(timer);
-      const scrollContainer = blogContentRef.current;
       if (scrollContainer) {
         scrollContainer.removeEventListener("scroll", handleScroll);
       }
@@ -470,28 +468,16 @@ export default function Blog() {
     }
   };
 
-  const [showToast, setShowToast] = React.useState(false);
-
   // 渲染 Markdown 内容（简化版）
    // 渲染 Markdown 内容（简化版）
   const renderMarkdown = (content: string) => {
     const lines = content.split("\n");
     const elements: JSX.Element[] = [];
-    let inCodeBlock = false;
-    let codeBlockContent = "";
-    let codeLanguage = "";
     let headingIndex = 0; 
 
     // ... (copyToClipboard 函数保持不变) ...
 
     lines.forEach((line, index) => {
-      // ... (代码块处理逻辑保持不变) ...
-      
-      if (inCodeBlock) {
-        // ... (代码块内容拼接保持不变) ...
-        return;
-      }
-
       // 标题处理
       if (line.startsWith("# ")) {
         // ... (H1 处理) ...
@@ -540,15 +526,16 @@ export default function Blog() {
           }
           elements.push(
             <div key={index} className="my-6 flex justify-center">
-              <img 
-                src={src} 
-                alt={altText} 
-                className="max-w-full h-auto rounded-lg shadow-lg border border-gray-700" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={altText}
+                className="max-w-full h-auto rounded-lg shadow-lg border border-gray-700"
                 loading="lazy"
                 width={1000}
                 onError={(e) => {
                   // 图片加载失败时的处理
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.style.display = "none";
                   console.error(`图片加载失败: ${src}`);
                 }}
               />
@@ -616,23 +603,6 @@ export default function Blog() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      {/* Toast 提示 */}
-      {showToast && (
-        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <polyline points="20,6 9,17 4,12"></polyline>
-          </svg>
-          代码已复制到剪贴板
-        </div>
-      )}
 
       <div
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen font-[family-name:var(--font-geist-sans)] custom-scrollbar overflow-x-hidden`}
@@ -1098,7 +1068,7 @@ export default function Blog() {
             href="/chat"
             className="bg-[rgba(0,0,0,.5)] hover:bg-[rgba(0,0,0,.7)] rounded-[5px] p-[8px] cursor-pointer transition-all duration-200 flex items-center gap-2 text-white backdrop-blur-sm"
           >
-            <span className="text-sm">聊天室</span>
+            <span className="text-sm">留言室</span>
             <SvgIcon name="right" width={20} height={20} color="#fff" />
           </Link>
         </div>

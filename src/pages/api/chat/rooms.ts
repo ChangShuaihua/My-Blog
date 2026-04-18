@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma";
+import { createRoom, getRooms } from "@/lib/messageBoardStore";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,40 +7,26 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const rooms = await prisma.chatRoom.findMany({
-        include: {
-          messages: {
-            take: 1,
-            orderBy: { createdAt: "desc" },
-          },
-          _count: {
-            select: { messages: true },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
-      });
-
-      res.status(200).json(rooms);
-    } catch {
-      res.status(500).json({ error: "Failed to fetch rooms" });
+      return res.status(200).json(getRooms());
+    } catch (error) {
+      console.error("Failed to fetch message rooms:", error);
+      return res.status(500).json({ error: "Failed to fetch rooms" });
     }
   } else if (req.method === "POST") {
     try {
       const { name, description } = req.body;
+      if (!name || typeof name !== "string") {
+        return res.status(400).json({ error: "Room name is required" });
+      }
 
-      const room = await prisma.chatRoom.create({
-        data: {
-          name,
-          description,
-        },
-      });
-
-      res.status(201).json(room);
-    } catch {
-      res.status(500).json({ error: "Failed to create room" });
+      const room = createRoom(name, description);
+      return res.status(201).json(room);
+    } catch (error) {
+      console.error("Failed to create message room:", error);
+      return res.status(500).json({ error: "Failed to create room" });
     }
   } else {
     res.setHeader("Allow", ["GET", "POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

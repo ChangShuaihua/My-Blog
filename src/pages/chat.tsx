@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import PusherClient, { PresenceChannel } from "pusher-js";
 import SvgIcon from "@/components/SvgIcon";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -26,28 +25,6 @@ interface ChatRoom {
   _count: { messages: number };
 }
 
-interface PusherMember {
-  id: string;
-  info: {
-    name: string;
-    avatar?: string;
-  };
-}
-
-interface PusherMembers {
-  count: number;
-  members: Record<string, PusherMember>;
-}
-
-interface PusherAuthResponse {
-  auth: string;
-  channel_data?: string;
-}
-
-interface PusherChannel {
-  name: string;
-}
-
 export default function ChatPage() {
   const { theme } = useTheme();
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
@@ -55,7 +32,6 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [userName, setUserName] = useState("");
-  const [isConnected, setIsConnected] = useState(false);
   const [showUserModal, setShowUserModal] = useState(true);
   const [currentUserId, setCurrentUserId] = useState("");
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
@@ -66,13 +42,9 @@ export default function ChatPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pusherRef = useRef<PusherClient | null>(null);
-  const channelRef = useRef<PresenceChannel | null>(null);
   const sendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [onlineUsers, setOnlineUsers] = useState<number>(0);
-  const [onlineUsersList, setOnlineUsersList] = useState<PusherMember[]>([]);
-  console.log("🚀 ~ ChatPage ~ onlineUsersList:", onlineUsersList);
+  const onlineUsers = 1;
   // 滚动到底部
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -103,246 +75,44 @@ export default function ChatPage() {
     }
   }, []);
 
-  // 初始化 Pusher
+  // 加载留言室列表
   useEffect(() => {
-    if (!userName) return;
+    const loadRooms = async () => {
+      try {
+        setIsLoadingRooms(true);
+        const response = await fetch("/api/chat/rooms");
 
-    // 如果已有连接，先清理
-    if (pusherRef.current) {
-      if (channelRef.current) {
-        channelRef.current.unbind_all();
-        pusherRef.current.unsubscribe(channelRef.current.name);
-      }
-      pusherRef.current.disconnect();
-    }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    pusherRef.current = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-      forceTLS: true,
-      enabledTransports: ["ws", "wss"],
-      // 添加认证端点
-      authorizer: (channel: PusherChannel) => {
-        return {
-          authorize: (
-            socketId: string,
-            callback: (
-              error: Error | null,
-              data: PusherAuthResponse | null
-            ) => void
-          ) => {
-            fetch("/api/pusher/auth", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                socket_id: socketId,
-                channel_name: channel.name,
-                user_id: currentUserId,
-                user_info: {
-                  name: userName,
-                  avatar: null,
-                },
-              }),
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                callback(null, data);
-              })
-              .catch((error) => {
-                console.error("Auth error:", error);
-                callback(error, null);
-              });
-          },
-        };
-      },
-      activityTimeout: 120000,
-      pongTimeout: 30000,
-    });
+        const data = await response.json();
 
-    pusherRef.current.connection.bind("connected", () => {
-      console.log(
-        "Pusher connected, connection ID:",
-        pusherRef.current?.connection.socket_id
-      );
-      setIsConnected(true);
-      // 连接成功后立即尝试订阅当前房间
-      if (currentRoom) {
-        subscribeToRoom(currentRoom.id);
-        // 添加这行：连接成功后加载当前房间的消息
-        fetchMessages(currentRoom.id);
-      }
-    });
-
-    pusherRef.current.connection.bind("disconnected", () => {
-      console.log("Pusher disconnected");
-      setIsConnected(false);
-      setOnlineUsers(0);
-      setOnlineUsersList([]);
-    });
-
-    pusherRef.current.connection.bind("error", (error: Error) => {
-      console.error("Pusher connection error:", error);
-    });
-
-    pusherRef.current.connection.bind(
-      "state_change",
-      (states: { previous: string; current: string }) => {
-        console.log(
-          "Pusher state change:",
-          states.previous,
-          "→",
-          states.current
-        );
-      }
-    );
-
-    return () => {
-      if (channelRef.current) {
-        channelRef.current.unbind_all();
-        pusherRef.current?.unsubscribe(channelRef.current.name);
-        channelRef.current = null;
-      }
-      if (pusherRef.current) {
-        pusherRef.current.disconnect();
-        pusherRef.current = null;
+        if (Array.isArray(data)) {
+          setRooms(data);
+          if (data.length > 0) {
+            setCurrentRoom((prev) => prev ?? data[0]);
+          }
+        } else {
+          console.error("API returned non-array data:", data);
+          setRooms([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch rooms:", error);
+        setRooms([]);
+      } finally {
+        setIsLoadingRooms(false);
       }
     };
-  }, [userName, currentUserId]);
 
-  const subscribeToRoom = useCallback((roomId: string) => {
-    if (!pusherRef.current) {
-      console.warn("Pusher client not initialized");
-      return;
-    }
-
-    // 取消之前的订阅
-    if (channelRef.current) {
-      console.log(
-        "Unsubscribing from previous channel:",
-        channelRef.current.name
-      );
-      channelRef.current.unbind_all();
-      pusherRef.current.unsubscribe(channelRef.current.name);
-    }
-
-    // 订阅新房间
-    const channelName = `presence-chat-room-${roomId}`;
-    console.log("Subscribing to presence channel:", channelName);
-    channelRef.current = pusherRef.current.subscribe(
-      channelName
-    ) as PresenceChannel;
-
-    channelRef.current.bind("new-message", (data: Message) => {
-      console.log("Received new message:", data);
-      setMessages((prev) => {
-        // 防止重复消息
-        const exists = prev.some((msg) => msg.id === data.id);
-        if (exists) {
-          console.log("Message already exists, skipping:", data.id);
-          return prev;
-        }
-        return [...prev, data];
-      });
-
-      // 更新房间列表中当前房间的消息数量
-      setRooms((prevRooms) =>
-        prevRooms.map((room) =>
-          room.id === currentRoom?.id
-            ? { ...room, _count: { messages: room._count.messages + 1 } }
-            : room
-        )
-      );
-    });
-
-    // 监听在线用户变化
-    channelRef.current.bind(
-      "pusher:subscription_succeeded",
-      (members: PusherMembers) => {
-        console.log(
-          "Successfully subscribed to presence channel:",
-          channelName
-        );
-        console.log("Current members:", members);
-        setOnlineUsers(members.count);
-        setOnlineUsersList(Object.values(members.members));
-      }
-    );
-
-    channelRef.current.bind("pusher:member_added", (member: PusherMember) => {
-      console.log("Member added:", member);
-      setOnlineUsers((prev) => prev + 1);
-      setOnlineUsersList((prev) => [...prev, member]);
-    });
-
-    channelRef.current.bind("pusher:member_removed", (member: PusherMember) => {
-      console.log("Member removed:", member);
-      setOnlineUsers((prev) => Math.max(0, prev - 1));
-      setOnlineUsersList((prev) =>
-        prev.filter((user) => user.id !== member.id)
-      );
-    });
-
-    channelRef.current.bind("pusher:subscription_succeeded", () => {
-      console.log("Successfully subscribed to channel:", channelName);
-    });
-
-    channelRef.current.bind("pusher:subscription_error", (error: Error) => {
-      console.error("Subscription error for channel", channelName, ":", error);
-    });
+    loadRooms();
   }, []);
 
-  // 加载聊天室列表
+  // 切换留言室时加载历史留言
   useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  // 订阅当前房间
-  useEffect(() => {
-    if (
-      !currentRoom ||
-      !pusherRef.current ||
-      pusherRef.current.connection.state !== "connected"
-    ) {
-      return;
-    }
-
-    // 如果Pusher已连接，立即订阅
-    if (pusherRef.current?.connection.state === "connected") {
-      subscribeToRoom(currentRoom.id);
-    }
-
-    // 加载历史消息
+    if (!currentRoom) return;
     fetchMessages(currentRoom.id);
-  }, [currentRoom, subscribeToRoom]);
-
-  const fetchRooms = async () => {
-    try {
-      setIsLoadingRooms(true);
-      const response = await fetch("/api/chat/rooms");
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setRooms(data);
-        if (data.length > 0 && !currentRoom) {
-          setCurrentRoom(data[0]);
-        }
-      } else {
-        console.error("API returned non-array data:", data);
-        setRooms([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch rooms:", error);
-      setRooms([]);
-    } finally {
-      setIsLoadingRooms(false);
-    }
-  };
+  }, [currentRoom]);
 
   const fetchMessages = async (roomId: string) => {
     try {
@@ -368,13 +138,6 @@ export default function ChatPage() {
 
   const debouncedSendMessage = useCallback(async () => {
     if (!newMessage.trim() || !currentRoom || !userName || isSending) return;
-
-    // 检查Pusher连接状态
-    if (!isConnected || pusherRef.current?.connection.state !== "connected") {
-      setMessageError("连接已断开，请等待重新连接后再试");
-      setTimeout(() => setMessageError(""), 3000);
-      return;
-    }
 
     // 检查消息内容
     if (containsProfanity(newMessage)) {
@@ -410,14 +173,18 @@ export default function ChatPage() {
       const result = await response.json();
       console.log("Message sent successfully:", result);
 
-      // 更新房间列表中当前房间的消息数量
-      setRooms((prevRooms) =>
-        prevRooms.map((room) =>
+      setMessages((prev) => [...prev, result]);
+      setRooms((prevRooms) => {
+        const updatedRooms = prevRooms.map((room) =>
           room.id === currentRoom.id
             ? { ...room, _count: { messages: room._count.messages + 1 } }
             : room
-        )
-      );
+        );
+        return [...updatedRooms].sort(
+          (a, b) =>
+            (b.id === currentRoom.id ? 1 : 0) - (a.id === currentRoom.id ? 1 : 0)
+        );
+      });
 
       setNewMessage("");
       // 重置textarea高度
@@ -444,23 +211,6 @@ export default function ChatPage() {
       debouncedSendMessage();
     }, 300);
   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (pusherRef.current) {
-        const state = pusherRef.current.connection.state;
-        console.log("Current Pusher state:", state);
-
-        // 如果连接断开且用户已登录，尝试重连
-        if (state === "disconnected" && userName && !isConnected) {
-          console.log("Attempting to reconnect...");
-          pusherRef.current.connect();
-        }
-      }
-    }, 30000); // 每30秒检查一次
-
-    return () => clearInterval(interval);
-  }, [userName, isConnected]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -584,7 +334,7 @@ export default function ChatPage() {
 
   const themeClasses = getThemeClasses();
 
-  // 聊天室骨架屏组件
+  // 留言室骨架屏组件
   const RoomSkeleton = () => (
     <div className="p-2 animate-pulse">
       {[...Array(3)].map((_, index) => (
@@ -643,7 +393,7 @@ export default function ChatPage() {
           <h1
             className={`text-lg md:text-xl font-bold ${themeClasses.primaryText}`}
           >
-            聊天室
+            留言室
           </h1>
           <div className="flex items-center space-x-2">
             {/* 移动端导航按钮 */}
@@ -669,10 +419,8 @@ export default function ChatPage() {
               </Link>
             </div>
             <div
-              className={`w-3 h-3 rounded-full ${
-                isConnected ? "bg-green-500" : "bg-red-500"
-              }`}
-              title={isConnected ? "已连接" : "未连接"}
+              className="w-3 h-3 rounded-full bg-green-500"
+              title="内存模式"
             />
             {/* 移动端关闭按钮 */}
             <button
@@ -747,14 +495,14 @@ export default function ChatPage() {
     return (
       <>
         <Head>
-          <title>聊天室 - shuaihua&rsquo;s web</title>
+          <title>留言室 - shuaihua&rsquo;s web</title>
         </Head>
         <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div
             className={`${themeClasses.modalBg} rounded-lg p-6 w-full max-w-md mx-4`}
           >
             <h2 className={`text-[16px] mb-4 ${themeClasses.primaryText}`}>
-              请输入您的聊天昵称
+              请输入您的留言昵称
             </h2>
             <div className="mb-4">
               <input
@@ -784,7 +532,7 @@ export default function ChatPage() {
               disabled={!userName.trim() || !!nicknameError}
               className={`w-full text-white p-3 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-base ${themeClasses.selectedBg} cursor-pointer`}
             >
-              进入聊天室
+              进入留言室
             </button>
           </div>
         </div>
@@ -795,7 +543,7 @@ export default function ChatPage() {
   return (
     <>
       <Head>
-        <title>聊天室 - shuaihua&rsquo;s web</title>
+        <title>留言室 - shuaihua&rsquo;s web</title>
       </Head>
       <div className="h-screen flex flex-col md:justify-center md:items-center">
         {/* 导航按钮 - 桌面端 */}
@@ -839,11 +587,11 @@ export default function ChatPage() {
             <Sidebar className="h-full" />
           </div>
 
-          {/* 主聊天区域 */}
+          {/* 主留言区域 */}
           <div className="flex-1 flex flex-col">
             {currentRoom ? (
               <>
-                {/* 聊天头部 */}
+                {/* 留言头部 */}
                 <div
                   className={`px-4 py-[10px] ${themeClasses.sidebar} border-b ${themeClasses.sidebarBorder} flex items-center justify-between rounded-r-[10px] flex-shrink-0`}
                 >
@@ -873,7 +621,7 @@ export default function ChatPage() {
                             <span
                               className={`text-xs md:text-sm ${themeClasses.secondaryText}`}
                             >
-                              当前聊天室在线人数：{onlineUsers}
+                              当前留言室在线人数：{onlineUsers}
                             </span>
                           </div>
                         </div>
@@ -990,7 +738,7 @@ export default function ChatPage() {
               <div
                 className={`flex-1 flex items-center justify-center ${themeClasses.primaryText}`}
               >
-                <p className="text-lg">请选择一个聊天室</p>
+                <p className="text-lg">请选择一个留言室</p>
               </div>
             )}
           </div>

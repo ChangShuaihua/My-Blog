@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import SvgIcon from "./SvgIcon";
 
 // GitHub贡献数据类型定义
@@ -73,7 +73,7 @@ const GitHubHeatmap: React.FC<GitHubHeatmapProps> = ({ username, year }) => {
   };
 
   // 使用 github-contributions-api 获取贡献数据
-  const fetchContributions = async (username: string, year: number) => {
+  const fetchContributions = useCallback(async (username: string, year: number) => {
     try {
       const response = await fetch(
         `https://github-contributions-api.jogruber.de/v4/${username}?y=${year}`
@@ -93,7 +93,7 @@ const GitHubHeatmap: React.FC<GitHubHeatmapProps> = ({ username, year }) => {
       console.error("获取GitHub贡献数据失败:", error);
       throw error;
     }
-  };
+  }, []);
 
   useEffect(() => {
     const loadContributions = async () => {
@@ -133,7 +133,7 @@ const GitHubHeatmap: React.FC<GitHubHeatmapProps> = ({ username, year }) => {
     if (username) {
       loadContributions();
     }
-  }, [username, year]);
+  }, [username, year, fetchContributions]);
 
   // 获取颜色
   const getColor = (level: number): string => {

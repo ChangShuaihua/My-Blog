@@ -55,7 +55,7 @@ const set2 = new Set([1, 2, 2, 3]); // Set(3) {1, 2, 3}
 const set3 = new Set('hello');      // Set(4) {'h', 'e', 'l', 'o'}
 
 // 3. 注意：Set 对值的判断是“值相等”，对象/数组即使内容相同也视为不同
-const set4 = new Set([{a:1}, {a:1}]); // Set(2) {{a:1}, {a:1}}
+
 
 1.3 核心方法与属性
 类型名称作用属性size返回 Set 中元素的数量（只读，类似数组 length）操作add(value)向 Set 中添加元素，返回 Set 本身（可链式调用）操作delete(value)删除指定元素，返回布尔值（true = 删除成功，false = 元素不存在）操作has(value)判断是否包含指定元素，返回布尔值操作clear()清空 Set 中所有元素，无返回值遍历forEach(callback)遍历 Set 元素，回调参数：(value, key, set)（key 等于 value，兼容 Map）遍历keys()返回迭代器对象，遍历所有元素（与 values () 一致）遍历values()返回迭代器对象，遍历所有元素（Set 无键名，键值合一）遍历entries()返回迭代器对象，遍历 [value, value] 形式的数组（兼容 Map）

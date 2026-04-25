@@ -12,13 +12,13 @@
     "react",
     "typescript"
   ],
-  "homepage": "https://ChangShuaihua.github.io/2026-blog-public/",
+  "homepage": "https://my-blog-hazel-mu.vercel.app/", 
   "repository": {
     "type": "git",
-    "url": "https://github.com/ChangShuaihua/template-web.git"
+    "url": "https://github.com/ChangShuaihua/My-Blog.git"
   },
   "bugs": {
-    "url": "https://github.com/ChangShuaihua/template-web/issues"
+   "url": "https://github.com/ChangShuaihua/My-Blog/issues"
   },
   "scripts": {
     "count": "node scripts/generate-count.js",

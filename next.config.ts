@@ -15,6 +15,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  // GitHub Pages 等静态托管环境启用静态导出
+  ...(isVercel ? {} : { output: "export" as const }),
   // Vercel环境自动禁用路径配置，其他环境启用
   basePath: isVercel ? "" : basePath,
   assetPrefix: isVercel ? "" : basePath,

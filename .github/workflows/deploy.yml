@@ -30,10 +30,9 @@ jobs:
       - name: Build project
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          # 新增：放行所有依赖构建脚本，解决 ERR_PNPM_IGNORED_BUILDS 报错
-          PNPM_CONFIG_ALLOW_BUILDS: true
         run: |
           pnpm install --frozen-lockfile
+          rm -rf src/pages/api
           pnpm build
 
       - name: Deploy to GitHub Pages

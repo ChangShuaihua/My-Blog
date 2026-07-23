@@ -14,12 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # setup-node 的 cache: pnpm 必须先有 pnpm，否则会失败
+      # setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
+      # setup node22 + pnpm缓存
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -29,6 +30,8 @@ jobs:
       - name: Build project
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          # 新增：放行所有依赖构建脚本，解决 ERR_PNPM_IGNORED_BUILDS 报错
+          PNPM_CONFIG_ALLOW_BUILDS: true
         run: |
           pnpm install --frozen-lockfile
           pnpm build

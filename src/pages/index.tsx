@@ -300,7 +300,7 @@ export default function Home() {
                   <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[20px]">
                     Front-end
                   </span>{" "}
-                  development (前端开发工程师)
+                  development (AI开发工程师)
                 </div>
                 <div className="text-shadow-sm text-[#fff] text-[14px] md:text-[25px]">
                   <span className="bg-gradient-to-br from-[#1b2c55] to-[#3d85a9] bg-clip-text text-transparent text-[16px] md:text-[18px]">

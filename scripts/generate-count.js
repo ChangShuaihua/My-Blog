@@ -9,38 +9,48 @@ const OUTPUT_FILE = path.join(BLOGS_DIR, 'count.md');
 function scanDirectory(dir, basePath = '', level = 0) {
   const items = [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
-  
-  // 统计信息
+
   let fileCount = 0;
   let dirCount = 0;
-  
-  entries.forEach(entry => {
-    if (entry.name === 'count.md') return; // 跳过统计文件本身
-    
+
+  // 排序：文件夹在前，文件在后
+  const sorted = entries.sort((a, b) => {
+    if (a.isDirectory() && !b.isDirectory()) return -1;
+    if (!a.isDirectory() && b.isDirectory()) return 1;
+    return a.name.localeCompare(b.name, 'zh');
+  });
+
+  sorted.forEach(entry => {
+    if (entry.name === 'count.md') return;
+    // 跳过 images 目录（只包含图片资源）
+    if (entry.isDirectory() && entry.name === 'images') return;
+
     const fullPath = path.join(dir, entry.name);
     const relativePath = path.join(basePath, entry.name);
-    const indent = '│   '.repeat(level);
-    
+    const indent = '    '.repeat(level);
+
     if (entry.isDirectory()) {
       dirCount++;
       const subResult = scanDirectory(fullPath, relativePath, level + 1);
-      items.push({
-        type: 'directory',
-        name: entry.name,
-        path: relativePath,
-        indent,
-        children: subResult.items,
-        stats: subResult.stats
-      });
+      // 只添加有内容的目录
+      if (subResult.items.length > 0 || subResult.stats.files > 0) {
+        items.push({
+          type: 'directory',
+          name: entry.name,
+          path: relativePath,
+          indent,
+          children: subResult.items,
+          stats: subResult.stats
+        });
+      }
       fileCount += subResult.stats.files;
       dirCount += subResult.stats.directories;
     } else if (entry.name.endsWith('.md')) {
       fileCount++;
-      // 读取文件内容获取标题
       const content = fs.readFileSync(fullPath, 'utf8');
       const titleMatch = content.match(/^#\s+(.+)$/m);
       const title = titleMatch ? titleMatch[1] : entry.name.replace('.md', '');
-      
+
       items.push({
         type: 'file',
         name: entry.name,
@@ -50,7 +60,7 @@ function scanDirectory(dir, basePath = '', level = 0) {
       });
     }
   });
-  
+
   return {
     items,
     stats: { files: fileCount, directories: dirCount }
@@ -86,15 +96,11 @@ function generateStats(items) {
   let totalFiles = 0;
   let totalDirs = 0;
   const categoryStats = {};
-  
+
   function countItems(items, category = '根目录') {
     items.forEach(item => {
       if (item.type === 'directory') {
         totalDirs++;
-        if (!categoryStats[item.name]) {
-          categoryStats[item.name] = { files: 0, directories: 0 };
-        }
-        categoryStats[item.name].directories++;
         if (item.children) {
           countItems(item.children, item.name);
         }
@@ -107,9 +113,9 @@ function generateStats(items) {
       }
     });
   }
-  
+
   countItems(items);
-  
+
   return { totalFiles, totalDirs, categoryStats };
 }
 

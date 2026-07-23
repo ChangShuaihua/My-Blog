@@ -25,6 +25,7 @@ interface BlogArticle {
   readTime: string;
   filename: string;
   category: string;
+  subcategory: string;
 }
 
 interface TableOfContentsItem {
@@ -440,6 +441,21 @@ export default function Blog() {
     });
   };
 
+  // 格式化日期
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   // 打开文章
   const openArticle = (article: BlogArticle) => {
     setIsTransitioning(true);
@@ -468,65 +484,279 @@ export default function Blog() {
     }
   };
 
-  // 渲染 Markdown 内容（简化版）
-   // 渲染 Markdown 内容（简化版）
+  // 渲染行内 markdown 元素
+  const renderInlineMarkdown = (text: string): (string | JSX.Element)[] => {
+    // 先处理图片（行内图片）
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const codeRegex = /`([^`]+)`/g;
+    const boldRegex = /\*\*([^*]+)\*\*/g;
+    const italicRegex = /\*([^*]+)\*/g;
+
+    const parts: (string | JSX.Element)[] = [];
+    let remaining = text;
+    let keyIndex = 0;
+
+    // 处理图片
+    const imageMatch = imageRegex.exec(remaining);
+    if (imageMatch) {
+      const before = remaining.substring(0, imageMatch.index);
+      if (before) {
+        parts.push(...renderInlineFormatting(before, keyIndex));
+        keyIndex += before.length;
+      }
+      const src = imageMatch[2].startsWith("/public/")
+        ? imageMatch[2].replace("/public", "")
+        : imageMatch[2];
+      parts.push(
+        <img
+          key={`img-${keyIndex++}`}
+          src={src}
+          alt={imageMatch[1]}
+          className="max-w-full h-auto rounded my-4"
+          loading="lazy"
+        />
+      );
+      remaining = remaining.substring(imageMatch.index + imageMatch[0].length);
+      if (remaining) {
+        parts.push(...renderInlineFormatting(remaining, keyIndex));
+      }
+      return parts;
+    }
+
+    return renderInlineFormatting(remaining, keyIndex);
+  };
+
+  const renderInlineFormatting = (
+    text: string,
+    startKey: number
+  ): (string | JSX.Element)[] => {
+    const parts: (string | JSX.Element)[] = [];
+    let remaining = text;
+    let keyIndex = startKey;
+
+    // 处理行内代码、粗体、斜体、链接
+    while (remaining.length > 0) {
+      // 匹配第一个出现的格式标记
+      const codeMatch = /`([^`]+)`/.exec(remaining);
+      const boldMatch = /\*\*([^*]+)\*\*/.exec(remaining);
+      const linkMatch = /\[([^\]]+)\]\(([^)]+)\)/.exec(remaining);
+
+      const matches = [
+        { match: codeMatch, type: "code" as const, index: codeMatch?.index ?? -1 },
+        { match: boldMatch, type: "bold" as const, index: boldMatch?.index ?? -1 },
+        { match: linkMatch, type: "link" as const, index: linkMatch?.index ?? -1 },
+      ].filter((m) => m.index >= 0);
+      matches.sort((a, b) => a.index - b.index);
+
+      if (matches.length === 0) {
+        // 处理斜体（最后处理，避免和粗体冲突）
+        const italicParts = remaining.split(/(\*[^*]+\*)/g);
+        italicParts.forEach((p, i) => {
+          if (p.startsWith("*") && p.endsWith("*")) {
+            parts.push(<em key={`em-${keyIndex++}`}>{p.slice(1, -1)}</em>);
+          } else if (p) {
+            parts.push(p);
+          }
+        });
+        break;
+      }
+
+      const first = matches[0];
+      if (first.index > 0) {
+        parts.push(remaining.substring(0, first.index));
+      }
+
+      if (first.type === "code" && first.match) {
+        parts.push(
+          <code
+            key={`code-${keyIndex++}`}
+            className="bg-[rgba(255,255,255,.08)] px-1.5 py-0.5 rounded text-sm text-[#e6a23c] font-mono"
+          >
+            {first.match[1]}
+          </code>
+        );
+        remaining = remaining.substring(first.index + first.match[0].length);
+      } else if (first.type === "bold" && first.match) {
+        parts.push(
+          <strong key={`bold-${keyIndex++}`} className="text-white font-semibold">
+            {first.match[1]}
+          </strong>
+        );
+        remaining = remaining.substring(first.index + first.match[0].length);
+      } else if (first.type === "link" && first.match) {
+        parts.push(
+          <a
+            key={`link-${keyIndex++}`}
+            href={first.match[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#3d85a9] hover:text-[#5ba5c9] underline underline-offset-2 transition-colors"
+          >
+            {first.match[1]}
+          </a>
+        );
+        remaining = remaining.substring(first.index + first.match[0].length);
+      }
+    }
+
+    return parts;
+  };
+
+  // 渲染 Markdown 内容
   const renderMarkdown = (content: string) => {
     const lines = content.split("\n");
     const elements: JSX.Element[] = [];
-    let headingIndex = 0; 
+    let headingIndex = 0;
+    let inCodeBlock = false;
+    let codeBlockContent = "";
+    let codeBlockLang = "";
+    let inList = false;
+    let listItems: JSX.Element[] = [];
+    let listType: "ul" | "ol" = "ul";
 
-    // ... (copyToClipboard 函数保持不变) ...
+    const flushList = () => {
+      if (inList && listItems.length > 0) {
+        if (listType === "ol") {
+          elements.push(
+            <ol key={`list-${headingIndex++}`} className="list-decimal list-inside mb-4 text-gray-300 space-y-1">
+              {listItems}
+            </ol>
+          );
+        } else {
+          elements.push(
+            <ul key={`list-${headingIndex++}`} className="list-disc list-inside mb-4 text-gray-300 space-y-1">
+              {listItems}
+            </ul>
+          );
+        }
+        listItems = [];
+        inList = false;
+      }
+    };
 
     lines.forEach((line, index) => {
-      // 标题处理
-      if (line.startsWith("# ")) {
-        // ... (H1 处理) ...
-        const id = `heading-${headingIndex}`;
-        headingIndex++;
+      // 代码块处理
+      if (line.startsWith("```")) {
+        if (inCodeBlock) {
+          // 结束代码块
+          elements.push(
+            <div key={index} className="my-4 rounded-lg overflow-hidden border border-[rgba(255,255,255,.1)]">
+              {codeBlockLang && (
+                <div className="bg-[rgba(255,255,255,.05)] px-4 py-1.5 text-xs text-gray-500 font-mono">
+                  {codeBlockLang}
+                </div>
+              )}
+              <pre className="bg-[rgba(0,0,0,.3)] p-4 overflow-x-auto">
+                <code className="text-sm text-gray-200 font-mono leading-relaxed whitespace-pre">
+                  {codeBlockContent}
+                </code>
+              </pre>
+            </div>
+          );
+          codeBlockContent = "";
+          codeBlockLang = "";
+          inCodeBlock = false;
+        } else {
+          // 开始代码块
+          flushList();
+          codeBlockLang = line.replace("```", "").trim();
+          inCodeBlock = true;
+        }
+        return;
+      }
+
+      if (inCodeBlock) {
+        codeBlockContent += (codeBlockContent ? "\n" : "") + line;
+        return;
+      }
+
+      // 水平分割线
+      if (/^(-{3,}|\*{3,})$/.test(line.trim())) {
+        flushList();
         elements.push(
-          <h1 key={index} id={id} className="text-3xl font-bold mb-4 text-white mt-8 first:mt-0">
-            {line.replace("# ", "")}
+          <hr key={index} className="my-6 border-[rgba(255,255,255,.1)]" />
+        );
+        return;
+      }
+
+      // 标题
+      if (line.startsWith("# ")) {
+        flushList();
+        const id = `heading-${headingIndex++}`;
+        elements.push(
+          <h1
+            key={index}
+            id={id}
+            className="text-3xl font-bold mb-4 text-white mt-8 first:mt-0"
+          >
+            {renderInlineMarkdown(line.replace("# ", ""))}
           </h1>
         );
       } else if (line.startsWith("## ")) {
-        // ... (H2 处理) ...
-        const id = `heading-${headingIndex}`;
-        headingIndex++;
+        flushList();
+        const id = `heading-${headingIndex++}`;
         elements.push(
-          <h2 key={index} id={id} className="text-2xl font-bold mb-3 text-white mt-6">
-            {line.replace("## ", "")}
+          <h2
+            key={index}
+            id={id}
+            className="text-2xl font-bold mb-3 text-white mt-6 pb-2 border-b border-[rgba(255,255,255,.08)]"
+          >
+            {renderInlineMarkdown(line.replace("## ", ""))}
           </h2>
         );
       } else if (line.startsWith("### ")) {
-        // ... (H3 处理) ...
-        const id = `heading-${headingIndex}`;
-        headingIndex++;
+        flushList();
+        const id = `heading-${headingIndex++}`;
         elements.push(
-          <h3 key={index} id={id} className="text-xl font-bold mb-2 text-white mt-4">
-            {line.replace("### ", "")}
+          <h3
+            key={index}
+            id={id}
+            className="text-xl font-semibold mb-2 text-white mt-5"
+          >
+            {renderInlineMarkdown(line.replace("### ", ""))}
           </h3>
         );
-      
-      // 【新增】图片处理逻辑
-      } else if (line.startsWith("![")) {
-        // 正则匹配: ![alt text](image_url)
-        // 注意：这里是一个简化的正则，假设图片语法独占一行且格式标准
+      } else if (line.startsWith("#### ")) {
+        flushList();
+        const id = `heading-${headingIndex++}`;
+        elements.push(
+          <h4
+            key={index}
+            id={id}
+            className="text-lg font-semibold mb-2 text-gray-200 mt-4"
+          >
+            {renderInlineMarkdown(line.replace("#### ", ""))}
+          </h4>
+        );
+      } else if (line.startsWith("##### ") || line.startsWith("###### ")) {
+        flushList();
+        const id = `heading-${headingIndex++}`;
+        const level = line.match(/^#+/)?.[0].length || 5;
+        elements.push(
+          <h5
+            key={index}
+            id={id}
+            className={`text-base font-semibold mb-2 text-gray-300 mt-3 ${level === 6 ? "text-sm" : ""}`}
+          >
+            {renderInlineMarkdown(line.replace(/^#+\s+/, ""))}
+          </h5>
+        );
+      }
+
+      // 图片（独占行）
+      else if (line.startsWith("![")) {
+        flushList();
         const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/;
         const match = line.match(imageRegex);
-        
         if (match) {
           const altText = match[1];
           let src = match[2];
-          
-          // 可选：如果图片路径需要特殊处理（例如去除 /public 前缀），可以在这里修改 src
-          // Next.js public 文件夹下的资源通常直接通过根路径访问，例如 /images/img.jpg
-          // 如果 md 中写的是 /public/images/xxx，可能需要改为 /images/xxx
-          if (src.startsWith('/public/')) {
-             src = src.replace('/public', '');
+          if (src.startsWith("/public/")) {
+            src = src.replace("/public", "");
           }
           elements.push(
             <div key={index} className="my-6 flex justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}
                 alt={altText}
@@ -534,7 +764,6 @@ export default function Blog() {
                 loading="lazy"
                 width={1000}
                 onError={(e) => {
-                  // 图片加载失败时的处理
                   e.currentTarget.style.display = "none";
                   console.error(`图片加载失败: ${src}`);
                 }}
@@ -542,25 +771,89 @@ export default function Blog() {
             </div>
           );
         } else {
-          // 如果正则匹配失败，作为普通文本显示
           elements.push(
             <p key={index} className="mb-4 text-gray-300 leading-relaxed">
-              {line}
+              {renderInlineMarkdown(line)}
             </p>
           );
         }
+      }
 
-      } else if (line.trim() && !line.startsWith("`")) {
-        // 普通段落
+      // 引用块
+      else if (line.startsWith("> ")) {
+        flushList();
         elements.push(
-          <p key={index} className="mb-4 text-gray-300 leading-relaxed">
-            {line}
+          <blockquote
+            key={index}
+            className="border-l-4 border-[#3d85a9] bg-[rgba(61,133,169,.08)] pl-4 py-2 my-3 text-gray-400 italic rounded-r"
+          >
+            {renderInlineMarkdown(line.replace(/^>\s*/, ""))}
+          </blockquote>
+        );
+      }
+
+      // 无序列表
+      else if (/^[\s]*[-*+]\s+/.test(line)) {
+        if (!inList || listType !== "ul") {
+          flushList();
+          inList = true;
+          listType = "ul";
+        }
+        const text = line.replace(/^[\s]*[-*+]\s+/, "");
+        listItems.push(
+          <li key={index} className="text-gray-300">
+            {renderInlineMarkdown(text)}
+          </li>
+        );
+      }
+
+      // 有序列表
+      else if (/^[\s]*\d+\.\s+/.test(line)) {
+        if (!inList || listType !== "ol") {
+          flushList();
+          inList = true;
+          listType = "ol";
+        }
+        const text = line.replace(/^[\s]*\d+\.\s+/, "");
+        listItems.push(
+          <li key={index} className="text-gray-300">
+            {renderInlineMarkdown(text)}
+          </li>
+        );
+      }
+
+      // 空行
+      else if (!line.trim()) {
+        flushList();
+        elements.push(<div key={index} className="h-2" />);
+      }
+
+      // 普通段落
+      else {
+        flushList();
+        elements.push(
+          <p key={index} className="mb-3 text-gray-300 leading-relaxed text-[15px]">
+            {renderInlineMarkdown(line)}
           </p>
         );
-      } else if (!line.trim()) {
-        elements.push(<br key={index} />);
       }
     });
+
+    // 清理未闭合的内容
+    flushList();
+
+    // 处理未闭合的代码块
+    if (inCodeBlock && codeBlockContent) {
+      elements.push(
+        <div key="trailing-code" className="my-4 rounded-lg overflow-hidden border border-[rgba(255,255,255,.1)]">
+          <pre className="bg-[rgba(0,0,0,.3)] p-4 overflow-x-auto">
+            <code className="text-sm text-gray-200 font-mono leading-relaxed whitespace-pre">
+              {codeBlockContent}
+            </code>
+          </pre>
+        </div>
+      );
+    }
 
     return elements;
   };
@@ -746,28 +1039,47 @@ export default function Blog() {
                     <div
                       key={article.id}
                       onClick={() => openArticle(article)}
-                      className="bg-[rgba(0,0,0,.3)] rounded-lg p-4 cursor-pointer hover:bg-[rgba(0,0,0,.4)] transition-all duration-200 border border-[rgba(255,255,255,.1)] hover:border-[#3d85a9] group"
+                      className="bg-[rgba(0,0,0,.3)] rounded-lg p-4 cursor-pointer hover:bg-[rgba(0,0,0,.4)] transition-all duration-200 border border-[rgba(255,255,255,.08)] hover:border-[#3d85a9] group"
                     >
-                      <div className="flex justify-between items-start mb-1">
-                        <h2 className="text-xl font-bold text-white group-hover:text-[#3d85a9] transition-colors">
+                      {/* 第一行：标题 + 日期 */}
+                      <div className="flex justify-between items-start gap-3 mb-2">
+                        <h2 className="text-lg font-bold text-white group-hover:text-[#3d85a9] transition-colors leading-snug line-clamp-1">
                           {article.title}
                         </h2>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-sm text-gray-400">
-                            {article.date}
-                          </span>
-                        </div>
+                        <span className="text-xs text-gray-500 whitespace-nowrap pt-0.5">
+                          {formatDate(article.date)}
+                        </span>
                       </div>
-                      <p className="text-gray-300 mb-2 leading-relaxed">
+
+                      {/* 描述 */}
+                      <p className="text-sm text-gray-400 mb-3 leading-relaxed line-clamp-2">
                         {article.description}
                       </p>
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-2">
-                          <span className="px-2 py-1 bg-[rgba(61,133,169,.2)] text-[#fff] rounded text-sm">
+
+                      {/* 底部：分类 + 标签 + 阅读时间 */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* 主分类 */}
+                          <span className="px-2 py-0.5 bg-[rgba(61,133,169,.15)] text-[#7ab8d4] rounded text-xs font-medium">
                             {article.category}
                           </span>
+                          {/* 子分类（如果和主分类不同） */}
+                          {article.subcategory !== article.category && (
+                            <span className="px-2 py-0.5 bg-[rgba(255,255,255,.05)] text-gray-500 rounded text-xs">
+                              {article.subcategory}
+                            </span>
+                          )}
+                          {/* 标签 */}
+                          {article.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs text-gray-500 bg-[rgba(255,255,255,.03)] px-1.5 py-0.5 rounded"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
                         </div>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-xs text-gray-600 whitespace-nowrap">
                           {article.readTime}
                         </span>
                       </div>

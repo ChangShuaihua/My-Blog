@@ -1,152 +1,370 @@
-<p align="center"><img src="/public/images/work1.jpg" /></p>
+# Shuaihua's Web
 
-<h1 align="center">template-web</h1>
+基于 **Next.js 16** + **React 19** + **TypeScript** + **Tailwind CSS 4** 构建的个人网站，集个人介绍、博客知识库、作品展示、实时留言室于一体。
 
-This template should help get you started developing with React in Next.js.
-<br>
-这个模板应该有助于你开始在 Next.js 中使用 React 进行开发。
+> 🚀 在线访问：[my-blog-two-red.vercel.app](https://my-blog-two-red.vercel.app/)
 
-> [!NOTE]
-> If you think `TemplateWeb` is helpful to you, or you like my project, please give my project a ⭐️ on GitHub. Your support is the driving force for me to continue to improve! Thank you for your support! If there are any areas that are not good enough, please raise an issue and I will improve it!
-> <br>
-> 如果你认为 TemplateWeb 对你有帮助，或者你喜欢我的项目，请给我的项目一个 ⭐️ 在 GitHub 上。您的支持是我不断改进的动力！感谢您的支持！如果有什么地方不够好，请提出 issue，我会改进的！
+[![Deploy Next.js Blog to GitHub Pages](https://github.com/ChangShuaihua/My-Blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/ChangShuaihua/My-Blog/actions/workflows/deploy.yml)
 
-## Introduction
+---
 
-该模板使用 Next.js + React + Prisma + Pusher 搭建，配置了请求封装、Prisma 连接、Pusher 连接、主题切换、移动端适配、封装了对应的 svg-icon 组件、可以通过使用`svgIcon name="..."`引入对应的 svg 图标，对应[Svg 图标预设](https://yesicon.app/logos/?lang=zh-hans)，希望这个可以作为您的初始化项目模板，供您拓展和自定义属于您的项目。
+## 📋 目录
 
-## Node Version
+- [功能概览](#-功能概览)
+- [技术栈](#-技术栈)
+- [项目结构](#-项目结构)
+- [快速开始](#-快速开始)
+- [可用脚本](#-可用脚本)
+- [页面路由](#-页面路由)
+- [API 接口](#-api-接口)
+- [数据库](#-数据库)
+- [部署](#-部署)
+- [CSDN 博客迁移](#-csdn-博客迁移)
 
-node 版本: v20.10.0
-pnpm 版本: 8.8.0
+---
 
-## 运行方式
+## ✨ 功能概览
 
-1. 下载这个项目
-2. run `pnpm i`
-3. run `pnpm dev`
+### 🏠 首页
+- 打字机动画自我介绍
+- 暗色/亮色主题切换（跟随系统偏好）
+- 兴趣标签：点击弹出图片查看器、音乐播放器、视频播放器，支持弹幕效果
+- 社交链接：GitHub、QQ、微信（展示二维码弹窗）
+- GitHub 年度贡献热力图
+- 个人经历时间线
+- 导航卡片：作品集 / 文章 / 留言室
 
-## 目录说明
+### 📝 博客
+- **32 篇技术文章**，涵盖 JavaScript、Vue、React、TypeScript 等前端知识
+- 文章按分类筛选（CSDN迁移、技术分享会、阶段学习笔记、随笔碎碎念）
+- 全文搜索（标题、描述、标签）
+- Markdown 渲染：代码高亮、表格、列表、引用块、图片、链接
+- 文章详情页含目录导航，滚动自动高亮当前章节
+- 博客统计面板：总文章数、分类分布、目录结构树
+- 移动端适配响应式布局
 
-- `prisma/schema.prisma`
+### 💼 作品集
+- 全屏滚动吸附（Scroll Snap）式项目展示
+- 项目详情抽屉（技术栈、特性、功能截图/视频）
+- 图片点击放大查看
+- 导航指示器
 
-  - Prisma 的配置文件，用于定义数据库模型。
+### 💬 留言室
+- 多房间实时聊天
+- 昵称设置（持久化到 localStorage）
+- 不文明词汇过滤 + 昵称验证
+- 消息发送防抖
+- 移动端侧边栏抽屉
+- 骨架屏加载状态
 
-- `public`
+---
 
-  - 静态资源目录，用于存放静态资源。
+## 🛠 技术栈
 
-- `scripts`
+| 类别 | 技术 |
+|------|------|
+| 框架 | [Next.js 16](https://nextjs.org/) (Pages Router + Turbopack) |
+| UI 库 | [React 19](https://react.dev/) |
+| 语言 | [TypeScript](https://www.typescriptlang.org/) |
+| 样式 | [Tailwind CSS 4](https://tailwindcss.com/) |
+| 数据库 | [PostgreSQL](https://www.postgresql.org/) (Neon) + [Prisma ORM](https://www.prisma.io/) |
+| 实时通信 | [Pusher](https://pusher.com/) |
+| Markdown | [gray-matter](https://github.com/jonschlinkert/gray-matter) (解析 frontmatter) |
+| 日期处理 | [dayjs](https://day.js.org/) |
+| 包管理器 | [pnpm](https://pnpm.io/) |
+| 部署 | GitHub Pages + Vercel |
 
-  - 脚本目录，用于存放脚本。
+---
 
-- `service`
+## 📁 项目结构
 
-  - 请求方法，接口方法。
+```
+template-web-main/
+├── .github/workflows/         # GitHub Actions CI/CD
+│   └── deploy.yml             # 部署到 GitHub Pages
+├── prisma/
+│   └── schema.prisma          # 数据库模型定义
+├── public/                    # 静态资源
+│   ├── images/                # 图片资源
+│   ├── svgs/                  # SVG 图标
+│   ├── blogimage/             # 博客文章图片
+│   └── ci/                    # CI 相关资源
+├── scripts/
+│   ├── generate-count.js      # 博客统计文件生成脚本
+│   └── watch-blogs.js         # 监听博客目录变化，自动更新统计
+├── src/
+│   ├── blogs/                 # 📝 博客文章 (Markdown)
+│   │   ├── csdn/              #   CSDN 迁移文章 (20篇)
+│   │   ├── 技术分享会/         #   技术分享笔记 (3篇)
+│   │   ├── 阶段学习笔记/       #   学习笔记 (7篇)
+│   │   └── 随笔，碎碎念/       #   随笔 (2篇)
+│   ├── components/            # 可复用组件
+│   │   ├── DanmakuComponent   # 弹幕组件
+│   │   ├── GitHubHeatmap      # GitHub 贡献热力图
+│   │   ├── ImageModal         # 图片查看弹窗
+│   │   ├── MusicModal         # 音乐播放弹窗
+│   │   ├── VideoModal         # 视频播放弹窗
+│   │   ├── CommentModal       # 评论弹窗
+│   │   ├── LoadingAnimation   # 加载动画
+│   │   ├── SvgIcon            # SVG 图标组件
+│   │   └── ThemeToggle        # 主题切换按钮
+│   ├── contexts/
+│   │   └── ThemeContext.tsx    # 主题上下文 (亮/暗)
+│   ├── data/
+│   │   ├── tagConfigs.ts      # 兴趣标签弹窗配置
+│   │   ├── works.ts           # 作品集数据
+│   │   └── experience.ts      # 个人经历数据
+│   ├── lib/
+│   │   ├── prisma.ts          # Prisma 单例客户端
+│   │   └── pusher.ts          # Pusher 实例
+│   ├── pages/
+│   │   ├── _app.tsx           # 应用入口 (主题、布局、加载动画)
+│   │   ├── _document.tsx      # HTML 文档结构
+│   │   ├── index.tsx          # 🏠 首页
+│   │   ├── blog.tsx           # 📝 博客页
+│   │   ├── works.tsx          # 💼 作品集页
+│   │   ├── chat.tsx           # 💬 留言室页
+│   │   └── api/               # API 路由
+│   │       ├── blogs.ts       #   获取博客列表
+│   │       ├── blog-stats.ts  #   获取博客统计
+│   │       ├── comments.ts    #   评论接口 (已注释)
+│   │       ├── reactions.ts   #   点赞接口 (已注释)
+│   │       ├── chat/          #   聊天相关接口
+│   │       └── pusher/        #   Pusher 认证
+│   └── utils/
+│       └── contentFilter.ts   # 不良内容过滤器
+├── csdn-md.js                 # CSDN 博客爬取迁移工具
+├── next.config.ts             # Next.js 配置
+├── tailwind.config.ts         # Tailwind 配置
+├── tsconfig.json              # TypeScript 配置
+├── vercel.json                # Vercel 部署配置
+└── package.json               # 项目依赖与脚本
+```
 
-- `src/blogs`
+---
 
-  - 存放 md 文件，项目会读取这个目录作为文章列表显示。
+## 🚀 快速开始
 
-- `src/components`
+### 环境要求
 
-  - 存放组件，包含弹窗、热力图等。
+- **Node.js** >= 20
+- **pnpm** >= 9（推荐，也可使用 npm/yarn）
 
-- `src/contexts/ThemeContext.tsx`
+### 安装与运行
 
-  - 主题上下文，用于切换主题。
+```bash
+# 1. 克隆项目
+git clone https://github.com/ChangShuaihua/My-Blog.git
+cd My-Blog/template-web-main
 
-- `src/lib/prisma.ts`
+# 2. 安装依赖
+pnpm install
 
-  - Prisma 的声明文件。
+# 3. 配置环境变量
+# 编辑 .env 文件，填入你的数据库连接和 Pusher 配置
+cp .env.example .env  # 如果有示例文件
 
-- `src/lib/pusher.ts`
+# 4. 初始化数据库（需要 PostgreSQL）
+npx prisma db push
+npx prisma generate
 
-  - Pusher 的声明文件。
+# 5. 启动开发服务器
+pnpm dev
+```
 
-- `src/pages_app.tsx`
+打开 [http://localhost:3000](http://localhost:3000) 查看效果。
 
-  - Next.js 的入口文件。
+### 环境变量
 
-- `src\components\LoadingAnimation.tsx`
+| 变量名 | 说明 | 必填 |
+|--------|------|------|
+| `DATABASE_URL` | PostgreSQL 连接字符串 (Neon 推荐) | 聊天/评论功能需要 |
+| `DIRECT_URL` | 直连数据库 URL | 推荐 |
+| `PUSHER_APP_ID` | Pusher 应用 ID | 实时聊天需要 |
+| `PUSHER_KEY` | Pusher 密钥 | 实时聊天需要 |
+| `PUSHER_SECRET` | Pusher 密钥 | 实时聊天需要 |
+| `PUSHER_CLUSTER` | Pusher 集群 (如 `mt1`) | 实时聊天需要 |
+| `NEXT_PUBLIC_PUSHER_KEY` | Pusher 公钥 (客户端) | 实时聊天需要 |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | Pusher 集群 (客户端) | 实时聊天需要 |
 
-  - 加载动画组件。
+---
 
-- `src/pages/index.tsx`
+## 📜 可用脚本
 
-  - 首页代码。
+| 命令 | 说明 |
+|------|------|
+| `pnpm dev` | 启动开发服务器 (Turbopack) |
+| `pnpm build` | 构建生产版本 |
+| `pnpm start` | 启动生产服务器 |
+| `pnpm lint` | 运行 ESLint 检查 |
+| `pnpm count` | 生成博客统计文件 `src/blogs/count.md` |
+| `pnpm watch-blogs` | 监听博客目录变化，自动更新统计 |
+| `pnpm push-db` | 推送 Prisma schema 到数据库 |
+| `pnpm generate` | 生成 Prisma 客户端 |
+| `pnpm deploy` | 构建并部署到 GitHub Pages |
 
-- `src/pages/works.tsx`
+---
 
-  - 作品页面代码。
+## 🗺 页面路由
 
-- `src/pages/blog.tsx`
+| 路由 | 页面 | 说明 |
+|------|------|------|
+| `/` | 首页 | 个人介绍、标签互动、导航入口 |
+| `/blog` | 博客 | 文章列表、分类筛选、搜索、Markdown 阅读 |
+| `/works` | 作品集 | 全屏滚动项目展示、详情抽屉 |
+| `/chat` | 留言室 | 多房间实时聊天 |
 
-  - 文章集页面代码。
+---
 
-- `src/pages/chat.tsx`
+## 🔌 API 接口
 
-  - 聊天室页面代码。
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/blogs` | GET | 获取所有博客文章（含分类、标签、描述） |
+| `/api/blog-stats` | GET | 获取博客统计信息（文章数、分类分布、目录树） |
+| `/api/chat/rooms` | GET/POST | 聊天室管理 |
+| `/api/chat/messages` | GET/POST | 聊天消息收发 |
+| `/api/pusher/auth` | POST | Pusher 实时通信认证 |
+| `/api/comments` | GET/POST | 评论系统（当前已注释） |
+| `/api/reactions` | GET/POST | 点赞系统（当前已注释） |
 
-- `src/pages/api/comments.ts`
+---
 
-  - 获取评论接口代码。
+## 🗄 数据库
 
-- `src/pages/api/reactions.ts`
+项目使用 **Prisma ORM** + **PostgreSQL**。主要模型：
 
-  - 获取文章点赞数接口代码。
+### ChatRoom（聊天室）
+```prisma
+model ChatRoom {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean   @default(false)
+  messages    Message[]
+}
+```
 
-- `src/pages/api/chat`
+### Message（消息）
+```prisma
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  userName  String
+  roomId    String
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+```
 
-  - 聊天室接口代码。
+### 初始化数据库
 
-- `src/data/works.ts`
+```bash
+npx prisma db push      # 同步 schema 到数据库
+npx prisma generate     # 生成 Prisma 客户端
+npx prisma studio       # 打开 Prisma 数据管理界面
+```
 
-  - 作品数据。
+---
 
-- `src/data/tagConfigs.ts`
+## 🚢 部署
 
-  - 标签配置数据。
+### Vercel（推荐）
 
-- `src/data/experience.ts`
+项目已配置 `vercel.json`，可直接导入 Vercel：
 
-  - 经历数据。
+```bash
+vercel --prod
+```
 
-- GitHubHeatmap 使用说明：
-  - `GitHubHeatmap username="996wuxian" year={2025}`
-  - 热力图只需要在这替换你的 username 即可
+### GitHub Pages
 
-## vercel 部署说明
+推送代码到 `main` 分支后，GitHub Actions 自动构建并部署到 GitHub Pages。
 
-1. 创建一个 vercel 账号(vercel 官网:https://vercel.com/)
-2. 连接你的 github 仓库
-3. vercel 创建一个 neon 数据库(neon 官网:https://neon.com/)
-4. neon 数据库和项目连接
-5. 部署
-6. 配置数据库连接字符串到 vercel 的环境变量中(一般将数据库跟项目进行连接后，重新部署就可以有环境变量了)
-7. 将 DIRECT_URL(即 neon 数据库的连接字符串) 也补充到环境变量中
-8. 配置域名说明文档:https://vercel.com/docs/domains/working-with-domains/add-a-domain#ip-diff-alerts
+配置文件：`.github/workflows/deploy.yml`
 
-## Prisma 连接说明
+> **注意**：GitHub Pages 部署需要设置 `NEXT_PUBLIC_BASE_PATH` 环境变量，在 Action 中已自动配置。
 
-1. 在项目根目录的.env 文件中将 vercel 创建的 neon 数据库连接字符串配置如下 neon 的连接字段:
-   DATABASE_URL="your-connection-string"
-   DIRECT_URL="your-connection-string"
+---
 
-2. 运行 `pnpm run push-db` 命令，将数据库结构推送到 neon 上
-3. 运行 `pnpm run generate` 命令，生成新的客户端代码
+## 📥 CSDN 博客迁移
 
-## Pusher 连接说明
+项目包含一个 CSDN 博客爬取迁移工具 `csdn-md.js`，可将 CSDN 博客文章批量下载并转换为 Markdown 格式保存到 `src/blogs/csdn/` 目录。
 
-1. 创建一个 pusher 账号(pusher 官网:https://pusher.com/)
-2. 创建一个 pusher 应用
-3. 配置 pusher 应用的连接字段填入.env 文件中
-4. 将项目根目录的.env 文件的字段添加到 vercel 的环境变量中
+### 使用方法
 
-## 注意
+1. 编辑 `csdn-md.js` 中的配置：
+   ```js
+   const BASE_URL = 'https://blog.csdn.net/your_username?type=blog'
+   const OUTPUT_DIR = 'path/to/output'
+   ```
 
-1. 如果修改表结构，则需要重新运行 `pnpm run push-db` 命令，将数据库结构推送到 neon 上
-2. 上传到您的 github 仓库时，请将.env 文件添加到.gitignore 文件中
-3. 这个只是基础模板，各位发挥自己的想象创造力打造吧！
-4. 如果遇到不懂的，请在 qq 群内联系我: 916088073
+2. 运行迁移脚本：
+   ```bash
+   node csdn-md.js
+   ```
 
+### 转换特性
+- HTML 内容 → Markdown（Turndown）
+- 自动提取标题、日期、标签到 frontmatter
+- 下载文章图片到本地 `images/` 子目录
+- 生成 `index.md` 格式，与博客系统完全兼容
+
+---
+
+## 📝 博客文章管理
+
+### 添加新文章
+
+在 `src/blogs/` 对应分类目录下创建 `.md` 文件：
+
+```markdown
+---
+title: 文章标题
+published: 2026-06-11
+description: 文章简述
+tags: [Vue, 前端]
+category: 技术分享会
+---
+
+## 正文内容...
+```
+
+### 文章分类
+
+- **`category`** (frontmatter)：用于博客页面的分类筛选，优先使用
+- **目录路径**：作为子分类展示，提供更细粒度的位置信息
+- 如果没有在 frontmatter 中指定 `category`，系统会自动使用目录路径作为分类
+
+### 自动统计
+
+```bash
+# 手动生成统计
+pnpm count
+
+# 自动监听文件变化生成统计
+pnpm watch-blogs
+```
+
+统计文件 `src/blogs/count.md` 会根据文章变化自动更新。
+
+---
+
+## 🎨 主题系统
+
+项目支持亮色/暗色两种主题：
+
+- 首次加载跟随系统偏好
+- 手动切换后持久化到 `localStorage`
+- 右上角固定主题切换按钮
+- 不同主题对应不同的背景图片
+
+---
+
+## 📄 许可证
+
+[MIT](LICENSE) © [ChangShuaihua](https://github.com/ChangShuaihua)
+
+---
+
+🤖 *Generated with [Claude Code](https://claude.com/claude-code)*

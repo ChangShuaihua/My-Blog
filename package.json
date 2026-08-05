@@ -27,6 +27,7 @@
     "push-db": "npx prisma db push",
     "generate": "npx prisma generate",
     "build": "next build",
+    "prebuild": "node scripts/generate-blog-data.js",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",

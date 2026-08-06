@@ -311,9 +311,7 @@ export default function Blog() {
     const handleScroll = () => {
       if (blogContentRef.current) {
         const scrollTop = blogContentRef.current.scrollTop;
-        const shouldShow = scrollTop > 100;
-        console.log("滚动位置:", scrollTop, "是否显示按钮:", shouldShow); // 调试日志
-        setShowBackToTop(shouldShow);
+        setShowBackToTop(scrollTop > 100);
       }
     };
 
@@ -323,12 +321,8 @@ export default function Blog() {
       scrollContainer = blogContentRef.current;
       if (scrollContainer) {
         scrollContainer.addEventListener("scroll", handleScroll);
-        console.log("回到顶部监听器已添加");
-
         // 立即检查一次滚动位置
         handleScroll();
-      } else {
-        console.log("blogContentRef.current 为空");
       }
     }, 300); // 增加延迟时间
 

@@ -40,6 +40,7 @@ export default function ChatPage() {
   const [nicknameError, setNicknameError] = useState("");
   const [messageError, setMessageError] = useState("");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [apiUnavailable, setApiUnavailable] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,6 +83,12 @@ export default function ChatPage() {
         setIsLoadingRooms(true);
         const response = await fetch("/api/chat/rooms");
 
+        if (response.status === 404) {
+          // 静态导出模式下 API 路由不可用（output: 'export'）
+          setApiUnavailable(true);
+          setRooms([]);
+          return;
+        }
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -98,7 +105,9 @@ export default function ChatPage() {
           setRooms([]);
         }
       } catch (error) {
+        // fetch 抛错通常是网络层 / 混合内容 / CORS 等原因，也视作 API 不可用
         console.error("Failed to fetch rooms:", error);
+        setApiUnavailable(true);
         setRooms([]);
       } finally {
         setIsLoadingRooms(false);
@@ -545,7 +554,20 @@ export default function ChatPage() {
       <Head>
         <title>留言室 - shuaihua&rsquo;s web</title>
       </Head>
-      <div className="h-screen flex flex-col md:justify-center md:items-center">
+
+      {/* 静态导出模式下 API 不可用提示 */}
+      {apiUnavailable && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm shadow-lg">
+          <div className="px-4 py-2 text-center">
+            ⚠️ 当前为静态部署（GitHub Pages 等），留言 / 点赞 / 实时聊天等服务端功能暂不可用。请使用 Vercel 或 Node.js 启动完整服务以体验全部功能。
+          </div>
+        </div>
+      )}
+
+      <div
+        className="h-screen flex flex-col md:justify-center md:items-center"
+        style={apiUnavailable ? { paddingTop: "36px" } : undefined}
+      >
         {/* 导航按钮 - 桌面端 */}
         <div className="hidden md:flex fixed top-4 left-4 z-10 gap-2">
           <Link
@@ -715,14 +737,19 @@ export default function ChatPage() {
                       value={newMessage}
                       onChange={handleTextareaChange}
                       onKeyPress={handleKeyPress}
-                      placeholder="输入消息..."
-                      className={`flex-1 p-2 border rounded-lg resize-none text-base ${themeClasses.inputBg} focus:outline-none focus:ring-2 focus:ring-gray-500 custom-scrollbar`}
+                      placeholder={
+                        apiUnavailable
+                          ? "静态部署模式下留言功能不可用"
+                          : "输入消息..."
+                      }
+                      disabled={apiUnavailable}
+                      className={`flex-1 p-2 border rounded-lg resize-none text-base ${themeClasses.inputBg} focus:outline-none focus:ring-2 focus:ring-gray-500 custom-scrollbar disabled:opacity-60 disabled:cursor-not-allowed`}
                       rows={1}
                       style={{ minHeight: "44px", maxHeight: "120px" }}
                     />
                     <button
                       onClick={sendMessage}
-                      disabled={!newMessage.trim() || isSending}
+                      disabled={apiUnavailable || !newMessage.trim() || isSending}
                       className={`text-white px-4 py-3 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[60px] h-[44px] transition-colors ${themeClasses.selectedBg}`}
                     >
                       {isSending ? (
